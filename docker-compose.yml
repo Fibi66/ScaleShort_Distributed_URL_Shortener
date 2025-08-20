@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Redis Cluster nodes
+  redis-node-1:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-1:/data
+    networks:
+      - scaleshort-network
+
+  redis-node-2:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-2:/data
+    networks:
+      - scaleshort-network
+
+  redis-node-3:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-3:/data
+    networks:
+      - scaleshort-network
+
+  redis-node-4:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-4:/data
+    networks:
+      - scaleshort-network
+
+  redis-node-5:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-5:/data
+    networks:
+      - scaleshort-network
+
+  redis-node-6:
+    image: redis:7-alpine
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+    volumes:
+      - redis-data-6:/data
+    networks:
+      - scaleshort-network
+
+  # Redis cluster init
+  redis-cluster-init:
+    image: redis:7-alpine
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+    command: >
+      sh -c "
+      sleep 5 &&
+      redis-cli --cluster create 
+      redis-node-1:6379 
+      redis-node-2:6379 
+      redis-node-3:6379 
+      redis-node-4:6379 
+      redis-node-5:6379 
+      redis-node-6:6379 
+      --cluster-replicas 1 --cluster-yes
+      "
+    networks:
+      - scaleshort-network
+
+  # ScaleShort Application
+  scaleshort:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_REDIS_CLUSTER_NODES=redis-node-1:6379,redis-node-2:6379,redis-node-3:6379,redis-node-4:6379,redis-node-5:6379,redis-node-6:6379
+      - APP_BASE_URL=http://localhost:8080
+      - DEFAULT_TTL_SECONDS=2592000
+    depends_on:
+      - redis-cluster-init
+    networks:
+      - scaleshort-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  scaleshort-network:
+    driver: bridge
+
+volumes:
+  redis-data-1:
+  redis-data-2:
+  redis-data-3:
+  redis-data-4:
+  redis-data-5:
+  redis-data-6:

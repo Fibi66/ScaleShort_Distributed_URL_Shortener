@@ -1,0 +1,13 @@
+spring:
+  redis:
+    cluster:
+      nodes: redis-node-1:6379,redis-node-2:6379,redis-node-3:6379,redis-node-4:6379,redis-node-5:6379,redis-node-6:6379
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+
+logging:
+  level:
+    com.scaleshort: INFO
+    org.springframework.data.redis: WARN
+    io.lettuce: WARN
