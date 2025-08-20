@@ -107,7 +107,3 @@ curl -I http://localhost:8080/r/aBc1234
 - **26,000 QPS** for URL retrieval (reads)  
 - **P99 < 40ms** for all operations
 - **10x faster** than Redis-only solution
-
-## License
-
-Copyright © 2025 ScaleShort. All rights reserved.
