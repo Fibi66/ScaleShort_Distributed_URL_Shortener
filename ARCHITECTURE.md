@@ -1,9 +1,8 @@
-# ScaleShort
 
-A production-ready distributed URL shortener with two-tier caching (Caffeine+Redis), handling 26K QPS with sub-40ms P99 latency for scalable deployments.
 
 # ScaleShort Architecture Diagram
 
+```
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                              CLIENTS / USERS                                  │
 ├──────────────────────────────────────────────────────────────────────────────┤
@@ -86,113 +85,75 @@ A production-ready distributed URL shortener with two-tier caching (Caffeine+Red
 │   • Data persistence with RDB/AOF                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
 
+## Request Flow Examples
 
-## Quick Start
-
-### Prerequisites
-
-**Java 17**
-```bash
-sudo apt-get update && sudo apt-get install -y openjdk-17-jdk
-java -version  # Should show: openjdk version "17.0.x"
+### User 1: Creating a Short URL
+```
+1. POST request to any ScaleShort instance
+2. Generate unique code (e.g., "abc123")
+3. Check L1 Caffeine cache (likely miss for new URL)
+4. Use SET NX EX on Redis to ensure atomicity
+5. Store in Redis with TTL (slot determined by CRC16 hash)
+6. Warm L1 cache with the new entry
+7. Return short URL to user
 ```
 
-**Redis** 
-```bash
-sudo apt-get install -y redis-server
-sudo systemctl start redis && sudo systemctl enable redis
-redis-cli ping  # Should return: PONG
+### User 2: Accessing a Short URL
+```
+1. GET request to any ScaleShort instance
+2. Extract code from URL (e.g., "xyz789")
+3. Check L1 Caffeine cache (fast lookup, <1ms if hit)
+4. If cache miss, query Redis cluster
+5. Redis determines slot: CRC16("u:xyz789") % 16384
+6. Fetch from appropriate master node
+7. Cache result in L1 for future requests
+8. Return 302 redirect or URL data
 ```
 
-**Docker (Optional for cluster mode)**
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo apt-get install -y docker-compose
-```
+## Concurrency & Consistency
 
-### Build & Run
+### How Multiple Users Don't Conflict:
 
-```bash
-# Build project
-./gradlew clean build
+1. **Stateless Application Servers**
+   - Any instance can handle any request
+   - No session affinity required
+   - Horizontal scaling is seamless
 
-# Run with local Redis (development)
-java -jar build/libs/scaleshort-1.0.0.jar --spring.profiles.active=local
+2. **Unique Code Generation**
+   - Base62 encoding with timestamp + random
+   - SET NX (set if not exists) ensures no duplicates
+   - Retry mechanism on collision
 
-# Run with Redis Cluster (production)
-docker-compose up -d
-```
+3. **Cache Consistency**
+   - Each instance has independent L1 cache
+   - Redis is single source of truth
+   - TTL ensures eventual consistency
 
-## API Documentation
+4. **Thread Safety**
+   - Lettuce client is thread-safe
+   - Connection pooling handles concurrent requests
+   - Caffeine cache is concurrent-friendly
 
-### Endpoints
+## Performance Under Load
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/urls` | Create short URL |
-| GET | `/api/v1/urls/{code}` | Get original URL |
-| GET | `/r/{code}` | Redirect to original URL |
-| GET | `/actuator/health` | Health check |
+With 2 users (or 2000 users):
+- **L1 Cache Hit**: ~0.1ms response time
+- **L2 Redis Hit**: ~2-5ms response time  
+- **Cache Miss**: ~10-20ms (includes Redis write)
+- **System can handle**: 26,000 QPS for reads, 4,500 QPS for writes
 
-### Examples
+## Scaling Considerations
 
-**Create Short URL**
-```bash
-curl -X POST http://localhost:8080/api/v1/urls \
-  -H 'Content-Type: application/json' \
-  -d '{"longUrl":"https://example.com","ttlSeconds":3600}'
+### Horizontal Scaling
+- Add more ScaleShort instances behind load balancer
+- Each instance handles ~8,000-10,000 QPS
 
-# Response: {"code":"aBc1234","shortUrl":"http://localhost:8080/r/aBc1234"}
-```
+### Redis Cluster Scaling
+- Add more master/replica pairs
+- Redistribute hash slots
+- Zero-downtime resharding
 
-**Get Original URL**
-```bash
-curl http://localhost:8080/api/v1/urls/aBc1234
-# Response: {"longUrl":"https://example.com"}
-```
-
-**Redirect**
-```bash
-curl -I http://localhost:8080/r/aBc1234
-# Returns: HTTP 302 with Location header
-```
-
-## Architecture
-
-- **Spring Boot 3.2.0** - Microservice framework
-- **Redis Cluster** - Distributed storage with 16,384 hash slots
-- **Caffeine Cache** - L1 in-memory cache with W-TinyLFU eviction
-- **Lettuce Client** - Thread-safe Redis client with connection pooling
-- **Two-tier Caching**: 
-  - L1 Caffeine: Sub-millisecond reads for hot data
-  - L2 Redis: Distributed persistent storage
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SPRING_PROFILES_ACTIVE` | Profile (local/production) | `local` |
-| `SPRING_REDIS_CLUSTER_NODES` | Redis nodes | `localhost:7000,...` |
-| `DEFAULT_TTL_SECONDS` | URL expiration | `2592000` (30 days) |
-| `APP_BASE_URL` | Base URL for short links | `http://localhost:8080` |
-| `CAFFEINE_MAX_SIZE` | L1 cache entries | `10000` |
-
-### Application Profiles
-
-- **local**: Single Redis instance for development
-- **production**: Full Redis Cluster with replicas
-- **docker**: Containerized deployment
-
-## Performance
-
-- **4,500 QPS** for URL creation (writes)
-- **26,000 QPS** for URL retrieval (reads)  
-- **P99 < 40ms** for all operations
-- **10x faster** than Redis-only solution
-
-## License
-
-Copyright © 2025 ScaleShort. All rights reserved.
+### Cache Optimization
+- Tune Caffeine size based on memory
+- Adjust TTL based on access patterns
+- Monitor hit rates via Micrometer metrics
