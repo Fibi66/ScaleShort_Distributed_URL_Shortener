@@ -2,10 +2,6 @@
 
 A production-ready distributed URL shortener with two-tier caching (Caffeine+Redis), handling 26K QPS with sub-40ms P99 latency for scalable deployments.
 
-# ScaleShort Architecture Diagram
-
-![ScaleShort Architecture](IMG_3392.JPG)
-
 ## Quick Start
 
 ### Prerequisites
