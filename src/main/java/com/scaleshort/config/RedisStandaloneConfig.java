@@ -11,7 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@Profile("local")
+@Profile("!cluster")
 public class RedisStandaloneConfig {
     
     @Bean

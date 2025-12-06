@@ -21,7 +21,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
-@Profile("!local")
+@Profile("cluster")
 public class RedisConfig {
     
     @Value("${spring.redis.cluster.nodes}")
