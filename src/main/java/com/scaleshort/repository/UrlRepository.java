@@ -11,56 +11,67 @@ import java.time.Duration;
 @Repository
 @RequiredArgsConstructor
 public class UrlRepository {
-    
-    private static final String KEY_PREFIX = "u:";
+
+    private static final String CODE_PREFIX = "c:";  // code -> url
+    private static final String URL_PREFIX = "u:";   // url -> code (反向索引)
     private final RedisTemplate<String, String> redisTemplate;
-    
-    public boolean saveIfNotExists(String code, String longUrl, long ttlSeconds) {
-        String key = KEY_PREFIX + code;
-        
+
+    /**
+     * 查询 URL 是否已有短码
+     */
+    public String findCodeByUrl(String longUrl) {
+        String key = URL_PREFIX + longUrl;
         try {
-            // Use SetOption.SET_IF_ABSENT with timeout for atomic SET NX EX
-            // This is the recommended way for atomic operations with Spring Data Redis
-            Boolean result = redisTemplate.opsForValue()
-                    .setIfAbsent(key, longUrl, Duration.ofSeconds(ttlSeconds));
-            
-            boolean success = Boolean.TRUE.equals(result);
-            if (success) {
-                log.debug("Successfully saved URL with code: {} with TTL: {} seconds", code, ttlSeconds);
-            } else {
-                log.debug("Code already exists: {}", code);
-            }
-            
-            return success;
+            return redisTemplate.opsForValue().get(key);
         } catch (Exception e) {
-            log.error("Error saving URL to Redis for code: {}", code, e);
-            throw new RuntimeException("Failed to save URL", e);
-        }
-    }
-    
-    public String findByCode(String code) {
-        String key = KEY_PREFIX + code;
-        
-        try {
-            String longUrl = redisTemplate.opsForValue().get(key);
-            if (longUrl != null) {
-                log.debug("Found URL for code: {}", code);
-            } else {
-                log.debug("No URL found for code: {}", code);
-            }
-            return longUrl;
-        } catch (Exception e) {
-            log.error("Error retrieving URL from Redis for code: {}", code, e);
+            log.error("Error finding code by URL", e);
             return null;
         }
     }
-    
-    public void setExpire(String code, long ttlSeconds) {
-        String key = KEY_PREFIX + code;
+
+    /**
+     * 保存短码映射（双向索引）
+     * 返回 true 表示成功，false 表示短码已被占用
+     */
+    public boolean save(String code, String longUrl, long ttlSeconds) {
+        String codeKey = CODE_PREFIX + code;
+        String urlKey = URL_PREFIX + longUrl;
+        Duration ttl = Duration.ofSeconds(ttlSeconds);
+
         try {
-            redisTemplate.expire(key, Duration.ofSeconds(ttlSeconds));
+            // 先检查短码是否已存在
+            Boolean codeSet = redisTemplate.opsForValue().setIfAbsent(codeKey, longUrl, ttl);
+            if (!Boolean.TRUE.equals(codeSet)) {
+                // 短码已被占用，检查是否是同一个 URL
+                String existingUrl = redisTemplate.opsForValue().get(codeKey);
+                if (longUrl.equals(existingUrl)) {
+                    log.debug("Same URL already has this code: {}", code);
+                    return true;
+                }
+                log.debug("Code collision: {} is used by another URL", code);
+                return false;
+            }
+
+            // 保存反向索引
+            redisTemplate.opsForValue().set(urlKey, code, ttl);
+            log.debug("Saved URL mapping: {} <-> {}", code, longUrl);
+            return true;
         } catch (Exception e) {
-            log.error("Error setting expiration for code: {}", code, e);
+            log.error("Error saving URL mapping", e);
+            throw new RuntimeException("Failed to save URL", e);
+        }
+    }
+
+    /**
+     * 根据短码查询 URL
+     */
+    public String findByCode(String code) {
+        String key = CODE_PREFIX + code;
+        try {
+            return redisTemplate.opsForValue().get(key);
+        } catch (Exception e) {
+            log.error("Error retrieving URL for code: {}", code, e);
+            return null;
         }
     }
 }

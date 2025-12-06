@@ -35,24 +35,34 @@ public class UrlShortenerService {
     public CreateUrlResponse createShortUrl(CreateUrlRequest request) {
         String longUrl = request.getLongUrl();
         long ttlSeconds = request.getTtlSeconds() != null ? request.getTtlSeconds() : defaultTtlSeconds;
-        
-        // Attempt to generate unique code with retries on collision
-        String code = null;
-        boolean saved = false;
-        int attempts = 0;
-        
+
+        // 1. 先查询这个 URL 是否已经有短码
+        String existingCode = urlRepository.findCodeByUrl(longUrl);
+        if (existingCode != null) {
+            log.debug("URL already exists with code: {}", existingCode);
+            return CreateUrlResponse.builder()
+                    .code(existingCode)
+                    .shortUrl(buildShortUrl(existingCode))
+                    .build();
+        }
+
+        // 2. 不存在，用哈希生成短码
+        String code = codeGenerator.generateCode(longUrl);
+        boolean saved = urlRepository.save(code, longUrl, ttlSeconds);
+
+        // 3. 哈希冲突，加盐重试
+        int attempts = 1;
         while (!saved && attempts < MAX_RETRY_ATTEMPTS) {
-            code = codeGenerator.generateCode();
-            saved = urlRepository.saveIfNotExists(code, longUrl, ttlSeconds);
+            code = codeGenerator.generateCodeWithSalt(longUrl, attempts);
+            saved = urlRepository.save(code, longUrl, ttlSeconds);
             attempts++;
-            
             if (!saved) {
-                log.debug("Code collision detected for: {}, retrying... (attempt {})", code, attempts);
+                log.debug("Hash collision, retrying with salt (attempt {})", attempts);
             }
         }
-        
+
         if (!saved) {
-            log.error("Failed to generate unique code after {} attempts", MAX_RETRY_ATTEMPTS);
+            log.error("Failed to generate unique code after {} attempts", attempts);
             throw new RuntimeException("Unable to generate unique short code");
         }
         
