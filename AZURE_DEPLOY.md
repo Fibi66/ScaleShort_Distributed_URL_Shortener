@@ -20,7 +20,7 @@ az login
 ```bash
 RESOURCE_GROUP="scaleshort-rg"
 LOCATION="eastus"
-ACR_NAME="scaleshortacr$(openssl rand -hex 4)"  # 自动生成唯一名称
+ACR_NAME="scaleshortacr$(openssl rand -hex 4)"
 REDIS_NAME="scaleshort-redis-$(openssl rand -hex 4)"
 ```
 

@@ -10,12 +10,12 @@ RUN gradle build --no-daemon -x test
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy the jar file
-COPY --from=build /app/build/libs/*.jar app.jar
+# Copy the jar file and entrypoint script
+COPY --from=build /app/build/libs/scaleshort-1.0.0.jar app.jar
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 8080
 
-# Azure Container Apps uses PORT env var
-ENV PORT=8080
-
-ENTRYPOINT ["java", "-Xmx512m", "-jar", "/app/app.jar"]
+# Use entrypoint script for runtime environment variable expansion
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
