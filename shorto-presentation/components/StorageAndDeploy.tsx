@@ -1,6 +1,6 @@
 import React from 'react';
 import { Section } from './ui/Section';
-import { Database, Clock, RefreshCw, Layers, Cloud, DollarSign, Activity } from 'lucide-react';
+import { Database, Clock } from 'lucide-react';
 
 export const StorageAndDeploy: React.FC = () => {
   return (
@@ -31,8 +31,6 @@ export const StorageAndDeploy: React.FC = () => {
             <div className="md:w-1/2 grid grid-cols-2 gap-4">
               <StorageCard icon={<Database size={20}/>} title="Database" value="Redis Key-Value" />
               <StorageCard icon={<Clock size={20}/>} title="TTL Policy" value="30 Days (Default)" />
-              <StorageCard icon={<RefreshCw size={20}/>} title="Persistence" value="AOF (Append Only File)" />
-              <StorageCard icon={<Layers size={20}/>} title="Scalability" value="Cluster Mode / Horizontal" />
             </div>
           </div>
         </div>
@@ -55,23 +53,6 @@ export const StorageAndDeploy: React.FC = () => {
              </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <FeatureCard 
-              icon={<Activity />} 
-              title="Elastic Scalability" 
-              desc="Easily handle traffic spikes with automatic resource scaling."
-            />
-            <FeatureCard 
-              icon={<Cloud />} 
-              title="Simplified Operations" 
-              desc="Platform handles orchestration, load balancing, and certificates."
-            />
-            <FeatureCard 
-              icon={<DollarSign />} 
-              title="Cost Efficiency" 
-              desc="Pay only for what you use, maximizing resource utilization."
-            />
-          </div>
         </div>
 
       </div>
@@ -87,12 +68,3 @@ const StorageCard = ({ icon, title, value }: { icon: React.ReactNode, title: str
   </div>
 );
 
-const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:border-primary-200 transition-colors">
-    <div className="w-10 h-10 bg-primary-50 text-primary-600 rounded-lg flex items-center justify-center mb-4">
-      {icon}
-    </div>
-    <h3 className="font-bold text-slate-900 mb-2">{title}</h3>
-    <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
-  </div>
-);

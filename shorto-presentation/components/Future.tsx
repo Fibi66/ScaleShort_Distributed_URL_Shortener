@@ -18,7 +18,7 @@ export const Future: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-4">Automated CI/CD</h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Set up a workflow in <strong className="text-white">GitHub Actions</strong> to automatically build, test, and deploy the application whenever changes are pushed to main.
+                Use <strong className="text-white">GitHub Actions</strong> to auto build, test, and deploy on push.
               </p>
               <div className="flex items-center gap-2 text-xs font-mono text-slate-500 border-t border-slate-700/50 pt-4">
                 <span>Code</span> → <span>Build</span> → <span>Deploy</span>
@@ -34,7 +34,7 @@ export const Future: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-4">Enhanced Analytics</h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Implement a dashboard to monitor user behavior, including click counts, referral sources, and campaign performance metrics for data-driven decisions.
+                Add a dashboard for click counts, referral sources, and campaign metrics.
               </p>
               {/* Fake Mini Chart UI */}
               <div className="flex items-end gap-1 h-8 border-b border-slate-600 pb-1 w-full opacity-50">
@@ -55,7 +55,7 @@ export const Future: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-4">Advanced Management</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Introduce a management dashboard that allows administrators to update, disable, or modify shortened links even after distribution.
+                Allow admins to update, disable, or modify links after creation.
               </p>
             </div>
           </div>
