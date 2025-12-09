@@ -1,25 +1,22 @@
 spring:
   application:
     name: scaleshort
-  
-  redis:
-    cluster:
-      nodes: ${SPRING_REDIS_CLUSTER_NODES:localhost:7000,localhost:7001,localhost:7002,localhost:7003,localhost:7004,localhost:7005}
-      max-redirects: 3
-    timeout: ${REDIS_COMMAND_TIMEOUT:2000ms}  # Command timeout
-    connect-timeout: ${REDIS_CONNECT_TIMEOUT:5000ms}  # Socket connect timeout
-    lettuce:
-      pool:
-        max-active: ${REDIS_POOL_MAX_ACTIVE:16}  # Maximum connections
-        max-idle: ${REDIS_POOL_MAX_IDLE:8}      # Maximum idle connections
-        min-idle: ${REDIS_POOL_MIN_IDLE:4}      # Minimum idle connections
-        max-wait: ${REDIS_POOL_MAX_WAIT:-1ms}   # Max wait time for connection
-        time-between-eviction-runs: 30s         # Eviction run interval
-      cluster:
-        refresh:
-          period: 60s                            # Topology refresh period
-          adaptive: true                         # Enable adaptive refresh
-  
+
+  # Default: Standalone Redis (for local development / demo)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:false}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 2
+
   cache:
     type: caffeine
     caffeine:
@@ -43,8 +40,8 @@ app:
 cache:
   caffeine:
     max-size: ${CAFFEINE_MAX_SIZE:10000}
-    expire-after-write-minutes: ${CAFFEINE_EXPIRE_MINUTES:10}  # Must be < Redis TTL
-    negative-cache-expire-seconds: ${NEGATIVE_CACHE_EXPIRE:60}  # 404 cache TTL
+    expire-after-write-minutes: ${CAFFEINE_EXPIRE_MINUTES:10}
+    negative-cache-expire-seconds: ${NEGATIVE_CACHE_EXPIRE:60}
 
 ratelimit:
   requests-per-minute: ${RATE_LIMIT_PER_MINUTE:60}
@@ -68,8 +65,8 @@ management:
 
 logging:
   level:
-    com.scaleshort: DEBUG
+    com.scaleshort: INFO
     org.springframework.data.redis: INFO
     io.lettuce: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%level] %msg%n"
