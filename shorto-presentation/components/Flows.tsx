@@ -8,8 +8,8 @@ export const Flows: React.FC = () => {
 
   return (
     <Section id="flows" className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">Core Logic & Flows</h2>
+      <div className="max-w-7xl mx-auto px-6">
+        <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">API Flows</h2>
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-12">
@@ -18,13 +18,13 @@ export const Flows: React.FC = () => {
               onClick={() => setActiveTab('shortening')}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'shortening' ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              URL Shortening Flow
+              Shortening Flow
             </button>
             <button
               onClick={() => setActiveTab('redirect')}
               className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'redirect' ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              Redirect Flow
+              Retrieving Flow
             </button>
           </div>
         </div>
@@ -37,7 +37,7 @@ export const Flows: React.FC = () => {
               <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 p-2">
                 <img
                   src="components/1.png"
-                  alt="URL Shortening Flow Diagram"
+                  alt="Shortening Flow Diagram"
                   className="w-[80%] h-auto mx-auto mix-blend-multiply"
                 />
               </div>
@@ -52,7 +52,7 @@ export const Flows: React.FC = () => {
                <div className="w-full max-w-3xl rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50 p-2">
                 <img
                   src="components/2.png"
-                  alt="URL Redirect Flow Diagram"
+                  alt="URL Retrieving Flow Diagram"
                   className="w-[80%] h-auto mx-auto mix-blend-multiply"
                 />
               </div>

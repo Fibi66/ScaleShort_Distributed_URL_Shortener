@@ -4,15 +4,16 @@ import { ArrowDown, Music, Mountain, Heart, Briefcase, GraduationCap, Sparkles }
 // Import images
 import introImg from '../pic/intro.jpg';
 import familyImg from '../pic/my family.jpg';
-import pennstateImg from '../pic/pennstate.png';
+import smealShieldImg from '../pic/SmealShield.webp';
 import cornellImg from '../pic/cornell.png';
 import northeasternImg from '../pic/northeastern.png';
 import goldmanImg from '../pic/goldman.jpg';
 import mossadamsImg from '../pic/mossadams.jpg';
 import hackathonImg from '../pic/hackathon.jpg';
 import cofoundImg from '../pic/cofoundstartup.jpg';
-import wiwynn from '../pic/ALL_fac_21L09_jyEjPHzJ8o.png';
-import bravomeal from '../pic/bravomeallogo.jpg';
+import wiwynn from '../pic/Wiwynn.jpg';
+import wiwynn1 from '../pic/Wiwynn1.jpg';
+import bravomeal from '../pic/bravoMeal.png';
 import volunteerImg from '../pic/volunteer.jpg';
 import volunteer2Img from '../pic/volunteer2.jpg';
 import concertImg from '../pic/concert.jpg';
@@ -23,7 +24,7 @@ import snowboard1Img from '../pic/snowboard1.jpg';
 interface TimelineItemProps {
   year: string;
   title: string;
-  description: string;
+  description: React.ReactNode;
   images: string[];
   icon: React.ReactNode;
   isLogo?: boolean;
@@ -51,6 +52,42 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ year, title, description, i
     return () => observer.disconnect();
   }, []);
 
+  // Two images layout: one left, one right
+  if (images.length === 2) {
+    return (
+      <div
+        ref={ref}
+        className={`flex flex-col items-center mb-24 transition-all duration-700 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
+        {/* Images row */}
+        <div className="flex items-center gap-8 w-full justify-center">
+          {/* Left image */}
+          <div className={`${isLogo ? 'w-48 h-48 bg-white p-6' : 'w-96 h-72'} rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300`}>
+            <img src={images[0]} alt={title} className={`w-full h-full ${isLogo ? 'object-contain' : 'object-cover'}`} />
+          </div>
+
+          {/* Timeline dot + content */}
+          <div className="flex flex-col items-center z-10 text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
+              {icon}
+            </div>
+            <div className="text-sm font-bold text-indigo-600 mt-2">{year}</div>
+            <h3 className="text-2xl font-bold text-slate-800 mt-4 mb-2">{title}</h3>
+            <p className="text-lg text-slate-600 leading-relaxed max-w-xs">{description}</p>
+          </div>
+
+          {/* Right image */}
+          <div className={`${isLogo ? 'w-48 h-48 bg-white p-6' : 'w-96 h-72'} rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300`}>
+            <img src={images[1]} alt={title} className={`w-full h-full ${isLogo ? 'object-contain' : 'object-cover'}`} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Single image layout
   return (
     <div
       ref={ref}
@@ -110,17 +147,26 @@ export const AboutMe: React.FC = () => {
 
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
             <span className="text-slate-800">Hi </span>
-            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Intuit</span>
+            <span className="text-[#0077C5]">Intuit</span>
             <span className="text-slate-800">, I'm </span>
             <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Giana</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-slate-600 font-light mx-auto whitespace-nowrap">
-            A <span className="font-semibold text-indigo-600">Software Engineer</span> with a unique journey from finance to tech.
-          </p>
+          <div className="flex justify-center gap-4">
+            <span className="px-5 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-lg text-indigo-600 font-medium">
+              26 yrs
+            </span>
+            <span className="px-5 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-lg text-indigo-600 font-medium">
+              GPA 4.0
+            </span>
+            <span className="px-5 py-2 bg-indigo-50 border border-indigo-200 rounded-full text-lg text-indigo-600 font-medium">
+              Full Scholarship
+            </span>
+          </div>
         </div>
 
-        <div className="absolute bottom-10 animate-bounce text-indigo-400">
+        <div className="absolute bottom-10 flex flex-col items-center animate-bounce text-indigo-400">
+          <span className="text-2xl md:text-3xl font-semibold text-slate-600 mb-2">Let's get Intuit it</span>
           <ArrowDown size={32} />
         </div>
       </header>
@@ -145,9 +191,9 @@ export const AboutMe: React.FC = () => {
 
         <TimelineItem
           year="2017"
-          title="Penn State University"
+          title="Penn State Smeal Business School"
           description="Bachelor's in Finance."
-          images={[pennstateImg]}
+          images={[smealShieldImg]}
           icon={<GraduationCap size={28} />}
           isLogo={true}
           align="right"
@@ -174,8 +220,8 @@ export const AboutMe: React.FC = () => {
 
         <TimelineItem
           year="2022-2024"
-          title="Moss Adams, Seattle"
-          description="Accounting for 2 years. but deep down I realized my true passion wasn't there..."
+          title="2yrs Accounting, Moss Adams"
+          description="While I gained solid professional experience, I realized my passion wasn't there."
           images={[mossadamsImg]}
           icon={<Briefcase size={28} />}
           align="left"
@@ -191,23 +237,31 @@ export const AboutMe: React.FC = () => {
         />
 
         <TimelineItem
-          year="2025"
-          title="Northeastern University"
-          description="M.S. Computer Science, 4.0 GPA, Full Scholarship."
-          images={[northeasternImg]}
-          icon={<GraduationCap size={28} />}
-          isLogo={true}
+          year="2025/01"
+          title="BravoMeal AI Startup"
+          description="Co-founded an AI-powered meal planning startup."
+          images={[bravomeal]}
+          icon={<Briefcase size={28} />}
           align="left"
         />
 
         <TimelineItem
           year="2025"
-          title="Software Engineering"
-          description="Founded AI startup and interned at Wiwynn."
-          images={[bravomeal, wiwynn]}
-          icon={<Briefcase size={28} />}
+          title="Northeastern University"
+          description={<>M.S. Computer Software Engineering, 4.0 GPA.<br />Full Scholarship.</>}
+          images={[northeasternImg]}
+          icon={<GraduationCap size={28} />}
           isLogo={true}
           align="right"
+        />
+
+        <TimelineItem
+          year="2025/06"
+          title="Wiwynn Internship"
+          description="Software Engineering Intern at Wiwynn."
+          images={[wiwynn, wiwynn1]}
+          icon={<Briefcase size={28} />}
+          align="left"
         />
 
         <TimelineItem

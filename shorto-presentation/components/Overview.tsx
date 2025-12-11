@@ -5,7 +5,7 @@ import { Server, Database, Container } from 'lucide-react';
 export const Overview: React.FC = () => {
   return (
     <Section id="overview" className="py-24 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         
         {/* Tech Stack - Compact */}
         <div className="bg-slate-900 text-white rounded-2xl p-6 md:p-8 shadow-lg relative overflow-hidden">
@@ -20,11 +20,11 @@ export const Overview: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <Database size={16} className="text-primary-400" />
-              <span className="text-slate-300 text-sm">Redis (AOF, 30-day TTL)</span>
+              <span className="text-slate-300 text-sm">Redis</span>
             </div>
             <div className="flex items-center gap-2">
               <Container size={16} className="text-primary-400" />
-              <span className="text-slate-300 text-sm">Docker / Azure Container Apps</span>
+              <span className="text-slate-300 text-sm">Docker / Azure</span>
             </div>
           </div>
         </div>

@@ -58,10 +58,6 @@ export const Architecture: React.FC = () => {
               <Database size={20} />
             </div>
             <h3 className="font-bold text-white text-sm">Redis Storage</h3>
-            <div className="mt-1 inline-flex items-center gap-1 text-xs text-white font-semibold px-2 py-1 bg-emerald-600 rounded-full">
-               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-               AOF Enabled
-            </div>
           </div>
 
         </div>

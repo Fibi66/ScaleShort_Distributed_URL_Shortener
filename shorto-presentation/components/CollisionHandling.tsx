@@ -60,7 +60,7 @@ const ThinkingCharacter: React.FC<{ mood: 'thinking' | 'sad' | 'idea' | 'happy';
               <div className="w-2 h-2 bg-slate-800 rounded-full"></div>
               <div className="w-2 h-2 bg-slate-800 rounded-full"></div>
             </div>
-            <div className="w-4 h-2 border-t-2 border-slate-800 rounded-full mt-1"></div>
+            <div className="w-5 h-2.5 border-b-2 border-slate-800 rounded-b-full"></div>
           </div>
         </div>
         <PartyPopper className="absolute -top-6 -right-2 w-6 h-6 text-purple-500" />
@@ -106,7 +106,7 @@ export const CollisionHandling: React.FC = () => {
 
   return (
     <Section id="collision" className="py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-slate-900 mb-4 text-center">Problem Encountered & Solution</h2>
         <p className="text-slate-500 text-center mb-12">My journey solving the URL shortening challenge</p>
 
@@ -133,7 +133,7 @@ export const CollisionHandling: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-6 items-center">
             {/* Left: Animated Character */}
             <div className="flex justify-center py-8">
-              {activeStep === 0 && <ThinkingCharacter mood="thinking" text="8 characters is too long!" />}
+              {activeStep === 0 && <ThinkingCharacter mood="thinking" text="Not scalable!" />}
               {activeStep === 1 && <ThinkingCharacter mood="sad" text="Hash collision!" />}
               {activeStep === 2 && <ThinkingCharacter mood="idea" text="I can use salt method." />}
               {activeStep === 3 && <ThinkingCharacter mood="happy" text="Successfully shortened the code!" />}
@@ -145,16 +145,15 @@ export const CollisionHandling: React.FC = () => {
                 <StoryStep
                   step={0}
                   label="SITUATION"
-                  title="The 8-Character Problem"
+                  title="Not Scalable"
                   color="from-blue-500 to-blue-600"
                   isActive={true}
                   content={
                     <div className="space-y-2">
-                      <p>Initially used database auto-increment ID for short URLs.</p>
+                      <p>Auto-increment IDs only give 100 million codes in total.</p>
                       <div className="bg-white/10 rounded-lg p-3 font-mono text-sm">
                         <span className="text-white/60">example:</span> s.zhifeiye.com/<span className="text-yellow-300">12345678</span>
                       </div>
-                      <p className="text-white/70 text-sm">Too long! Not user-friendly for sharing.</p>
                     </div>
                   }
                 />
@@ -168,12 +167,11 @@ export const CollisionHandling: React.FC = () => {
                   isActive={true}
                   content={
                     <div className="space-y-2">
-                      <p>Switched to SHA-256 hash for shorter codes, but...</p>
+                      <p>Switched to hash-based approach for shorter codes.</p>
                       <div className="bg-white/10 rounded-lg p-3 flex items-center gap-3">
                         <AlertTriangle className="text-yellow-300" />
-                        <span className="text-sm">Different URLs can produce same 6-char code!</span>
+                        <span className="text-sm">Hash collision: same code for different URLs!</span>
                       </div>
-                      <p className="text-white/70 text-sm">Need to handle hash collisions gracefully.</p>
                     </div>
                   }
                 />
@@ -188,10 +186,10 @@ export const CollisionHandling: React.FC = () => {
                   content={
                     <div className="space-y-2">
                       <p>Implemented collision detection with salt retry:</p>
-                      <div className="bg-white/10 rounded-lg p-3 font-mono text-xs space-y-1">
-                        <div><span className="text-green-300">1.</span> hash(url) → check if exists</div>
+                      <div className="bg-white/10 rounded-lg p-3 font-mono text-base space-y-2">
+                        <div><span className="text-green-300">1.</span> hash(url) → check exists</div>
                         <div><span className="text-yellow-300">2.</span> collision? → hash(url + "#1")</div>
-                        <div><span className="text-blue-300">3.</span> still collision? → hash(url + "#2")</div>
+                        <div><span className="text-blue-300">3.</span> repeat until unique</div>
                       </div>
                     </div>
                   }
@@ -201,16 +199,15 @@ export const CollisionHandling: React.FC = () => {
                 <StoryStep
                   step={3}
                   label="RESULT"
-                  title="Clean 6-Character URLs"
+                  title="56 Billion Combinations"
                   color="from-emerald-500 to-teal-600"
                   isActive={true}
                   content={
                     <div className="space-y-2">
-                      <p>Achieved short, collision-free URLs!</p>
-                      <div className="bg-white/10 rounded-lg p-3 font-mono text-sm">
-                        <span className="text-white/60">result:</span> s.zhifeiye.com/<span className="text-green-300">aB3xY9</span>
+                      <p>Clean 6-character URLs with massive scalability.</p>
+                      <div className="bg-white/10 rounded-lg p-3 font-mono text-lg font-bold text-center">
+                        62<sup>6</sup> = <span className="text-green-300">56 billion</span> codes
                       </div>
-                      <p className="text-white/70 text-sm">62^6 = 56 billion possible combinations</p>
                     </div>
                   }
                 />

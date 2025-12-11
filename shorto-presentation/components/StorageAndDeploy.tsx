@@ -5,7 +5,7 @@ import { Database, Clock } from 'lucide-react';
 export const StorageAndDeploy: React.FC = () => {
   return (
     <Section id="storage" className="py-24 bg-slate-50">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         
         {/* Storage Section */}
         <div className="mb-24">
@@ -35,25 +35,6 @@ export const StorageAndDeploy: React.FC = () => {
           </div>
         </div>
 
-        {/* Deployment Section (Slide 9) */}
-        <div id="deployment" className="pt-12 border-t border-slate-200">
-          <h2 className="text-3xl font-bold text-slate-900 mb-10 text-center">Cloud Deployment</h2>
-          
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-16">
-             <div className="bg-blue-600 text-white p-6 rounded-xl text-center w-full md:w-64">
-                <div className="text-4xl mb-2">🐳</div>
-                <div className="font-bold text-xl">Docker</div>
-                <div className="text-blue-100 text-sm mt-1">Containerization</div>
-             </div>
-             <div className="hidden md:block text-slate-300">➜</div>
-             <div className="bg-sky-500 text-white p-6 rounded-xl text-center w-full md:w-64">
-                <div className="text-4xl mb-2">☁️</div>
-                <div className="font-bold text-xl">Azure</div>
-                <div className="text-sky-100 text-sm mt-1">Container Apps</div>
-             </div>
-          </div>
-
-        </div>
 
       </div>
     </Section>
