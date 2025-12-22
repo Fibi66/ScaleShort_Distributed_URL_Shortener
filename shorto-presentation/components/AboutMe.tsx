@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowDown, Music, Mountain, Heart, Briefcase, GraduationCap, Sparkles } from 'lucide-react';
+import { ArrowDown, Music, Mountain, Heart, Briefcase, GraduationCap, Sparkles, Video } from 'lucide-react';
 
 // Import images
 import introImg from '../pic/intro.jpg';
@@ -20,6 +20,7 @@ import concertImg from '../pic/concert.jpg';
 import concert1Img from '../pic/concert1.jpg';
 import snowboardImg from '../pic/snowboard.jpg';
 import snowboard1Img from '../pic/snowboard1.jpg';
+import influencerImg from '../pic/influncer.jpg';
 
 interface TimelineItemProps {
   year: string;
@@ -289,6 +290,15 @@ export const AboutMe: React.FC = () => {
           images={[snowboardImg, snowboard1Img]}
           icon={<Mountain size={28} />}
           align="right"
+        />
+
+        <TimelineItem
+          year="Content"
+          title="CS Influencer"
+          description="Creating CS educational videos on Chinese social media."
+          images={[influencerImg]}
+          icon={<Video size={28} />}
+          align="left"
         />
       </section>
 
