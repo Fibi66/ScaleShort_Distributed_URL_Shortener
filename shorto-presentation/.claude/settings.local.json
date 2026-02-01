@@ -5,7 +5,8 @@
       "Bash(curl:*)",
       "Bash(ls:*)",
       "Bash(pkill:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
