@@ -1,11 +1,23 @@
-# ScaleShort
+# Shorto
 
-A high-performance distributed URL shortener with two-tier caching (Caffeine + Redis).
+A High-Performance Distributed **URL Shortening Service**
+
+**Live Demo:** [https://s.zhifeiye.com/](https://s.zhifeiye.com/) (The service down, will come back soon)
+
+---
+
+## Demo
+
+https://github.com/user-attachments/assets/demo.mp4
+
+> *If the video doesn't load, see [docs/demo.mp4](docs/demo.mp4)*
+
+---
+
 
 ## Quick Start
 
 ### Prerequisites
-
 - **Java 17+**
 - **Redis** (standalone for demo, cluster for production)
 
@@ -44,84 +56,88 @@ java -jar build/libs/scaleshort-1.0.0.jar
 
 Visit: **http://localhost:8080**
 
-You'll see the web interface where you can shorten URLs.
 
-## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/urls` | Create short URL |
-| GET | `/api/v1/urls/{code}` | Get original URL |
-| GET | `/r/{code}` | Redirect to original URL |
-| GET | `/actuator/health` | Health check |
-
-### Examples
-
-**Create Short URL:**
-```bash
-curl -X POST http://localhost:8080/api/v1/urls \
-  -H 'Content-Type: application/json' \
-  -d '{"longUrl":"https://example.com/very/long/url"}'
-
-# Response: {"code":"aBc1234","shortUrl":"http://localhost:8080/r/aBc1234"}
-```
-
-**Get Original URL:**
-```bash
-curl http://localhost:8080/api/v1/urls/aBc1234
-# Response: {"longUrl":"https://example.com/very/long/url"}
-```
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `REDIS_HOST` | Redis server host | `localhost` |
-| `REDIS_PORT` | Redis server port | `6379` |
-| `APP_BASE_URL` | Base URL for short links | `http://localhost:8080` |
-| `DEFAULT_TTL_SECONDS` | URL expiration time | `2592000` (30 days) |
-
-### Example
-
-```bash
-REDIS_HOST=redis.example.com APP_BASE_URL=https://short.ly java -jar build/libs/scaleshort-1.0.0.jar
-```
-
-## Architecture
+## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Spring Boot App                       │
-├─────────────────────────────────────────────────────────┤
-│  L1 Cache: Caffeine (10K entries, 10min TTL)            │
-├─────────────────────────────────────────────────────────┤
-│  L2 Cache: Redis (30-day TTL)                           │
-└─────────────────────────────────────────────────────────┘
+┌──────────────┐     ┌──────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Client    │ ──▶ │  Spring Boot App │ ──▶ │  Caching Layer  │ ──▶ │  Redis Storage  │
+│ Browser/Mobile│     │   REST | Service │     │ L1: Caffeine    │     │   AOF Enabled   │
+└──────────────┘     └──────────────────┘     │ L2: Redis       │     └─────────────────┘
+                                              └─────────────────┘
 ```
 
-- **Caffeine**: In-memory cache for hot data (sub-ms latency)
-- **Redis**: Persistent storage for all URLs
+- **Caffeine (L1)**: In-memory cache for hot data (sub-ms latency)
+- **Redis (L2)**: Persistent storage for all URLs with AOF durability
 
-## Production Mode (Redis Cluster)
 
-For production with Redis Cluster:
+## Core Logic & Flows
 
-```bash
-# Start 6-node Redis Cluster
-docker-compose up -d
+### URL Shortening Flow
 
-# Run with cluster profile
-java -jar build/libs/scaleshort-1.0.0.jar --spring.profiles.active=cluster
+![URL Shortening Flow](docs/shortening-flow.png)
+
+*Sequence diagram illustrating the interaction between Client, Controller, Service, and Redis.*
+
+### Redirect Flow
+
+![URL Redirect Flow](docs/redirect-flow.png)
+
+
+
+---
+
+
+### Collision Handling Flow
+
 ```
+        ┌─────────────────────────┐
+        │  Generate Short Code    │
+        └───────────┬─────────────┘
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+   ┌─────────────┐     ┌─────────────┐
+   │  ✓ Success  │     │  ✗ Collision│
+   │ Return Code │     │             │
+   └─────────────┘     └──────┬──────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │ Retry with Salt │
+                    │ hash(url + "#1")│
+                    └────────┬────────┘
+                             │
+                             └──── (loop back)
+```
+
+---
+
+## Data Storage & Persistence
+
+Optimized for high-speed read/write operations using Redis key-value store with durability guarantees.
+
+### Data Mappings
+
+| Type | Key Pattern | Value | Purpose |
+|------|-------------|-------|---------|
+| **Forward Mapping** | `c:{code}` | `{url}` | Code → URL lookup |
+| **Reverse Index** | `u:{url}` | `{code}` | Deduplication |
+
+### Storage Configuration
+
+| Setting | Value |
+|---------|-------|
+| **Database** | Redis Key-Value |
+| **TTL Policy** | 30 Days (Default) |
+| **Persistence** | AOF Enabled |
+
+
+
 
 ## Performance
 
-- **26,000 QPS** for URL retrieval
-- **4,500 QPS** for URL creation
+- **200 QPS** for URL retrieval
+- **100 QPS** for URL creation
 - **P99 < 40ms** latency
-
-## License
-
-MIT
